@@ -22,6 +22,7 @@ return {
 
       -- To instead override globally
       local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+      ---@diagnostic disable-next-line: duplicate-set-field
       function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
         opts = opts or {}
         opts.border = opts.border or border
@@ -37,31 +38,61 @@ return {
         ensure_installed =
         {
           "lua_ls",
-          'tsserver',
-          'volar',
+          "ts_ls",
+          -- "volar",
+          "gopls",
         },
-
+        handlers = {
+          function(server_name)
+            if server_name ~= "jdtls" then
+              vim.lsp.config[server_name] = {
+                handlers = handlers
+              }
+            end
+          end,
+        }
       })
-      require("mason-lspconfig").setup_handlers({
+
+      --[[ require("mason-lspconfig").setup_handlers({
         function(server_name)
           if server_name ~= "jdtls" then
-            require("lspconfig")[server_name].setup {
+            vim.lsp.config[server_name] = {
               handlers = handlers
             }
           end
         end,
-        volar = function()
-          require('lspconfig').volar.setup({})
+        function()
+          vim.lsp.config.pyright = {
+            init_options = {
+              pythonVersion = "3.10",
+              pythonPlatform = "Linux",
+              venvPath = "venv",
+            },
+          }
         end,
-        tsserver = function()
+         volar = function()
+          vim.lsp.config.volar = {
+            typescript = {
+              tsdk = "/home/saimanojk1/.nvm/versions/node/v22.13.1/lib/node_modules/typescript/lib"
+            },
+            vue = {
+              hybridMode = false,
+            },
+          }
+        end, 
+        ts_ls = function()
           local vue_typescript_plugin = require('mason-registry')
               .get_package('vue-language-server')
               :get_install_path()
-              .. '/node_modules/@vue/language-server'
-              .. '/node_modules/@vue/typescript-plugin'
-
-          require('lspconfig').tsserver.setup({
+              .. '/node_modules/@vue/language-server' .. '/node_modules/@vue/typescript-plugin'
+          vim.lsp.config.ts_ls = {
             init_options = {
+              typescript = {
+                tsdk = "~/.nvm/versions/node/v22.13.1/lib/node_modules/typescript/lib"
+              },
+              vue = {
+                hybridMode = false,
+              },
               plugins = {
                 {
                   name = "@vue/typescript-plugin",
@@ -79,9 +110,9 @@ return {
               'typescript.tsx',
               'vue',
             },
-          })
+          }
         end
-      })
+      })  ]]
     end,
     opts = {
       auto_install = true,
@@ -91,16 +122,16 @@ return {
     "neovim/nvim-lspconfig",
     config = function()
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
-      local lspconfig = require("lspconfig")
-      lspconfig.lua_ls.setup({
+      vim.lsp.config.lua_ls = {
         capabilities = capabilities,
-      })
-      lspconfig.tsserver.setup({
+      }
+      vim.lsp.config.ts_ls = {
         capabilities = capabilities,
-      })
+      }
       vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
       vim.keymap.set("n", "<leader>df", vim.lsp.buf.definition, {})
       vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references, {})
+      vim.keymap.set('n', '<leader>rf', vim.lsp.buf.rename, { noremap = true, silent = true })
       vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, {})
     end,
   },

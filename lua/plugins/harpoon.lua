@@ -27,9 +27,9 @@ return {
       { desc = "Open harpoon window" })
   end,
   keys = {
-    { "<leader>a",  function() require("harpoon"):list():add() end,     desc = "harpoon add file", },
+    { "<leader>ha",  function() require("harpoon"):list():add() end,     desc = "harpoon add file", },
     {
-      "<leader>h",
+      "<leader>hj",
       function()
         local harpoon = require("harpoon")
         harpoon.ui:toggle_quick_menu(harpoon:list())
