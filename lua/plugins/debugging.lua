@@ -3,9 +3,17 @@ return {
 		"mfussenegger/nvim-dap",
 		dependencies = {
 			"rcarriga/nvim-dap-ui",
+			"leoluz/nvim-dap-go",
+			"nvim-neotest/nvim-nio",
 		},
-		configure = function()
+		config = function()
 			local dap, dapui = require("dap"), require("dapui")
+
+			-- Setup Go debugging
+			require("dap-go").setup()
+
+			dapui.setup()
+
 			dap.listeners.before.attach.dapui_config = function()
 				dapui.open()
 			end
@@ -44,6 +52,12 @@ return {
 			end)
 			vim.keymap.set("n", "<Leader>dl", function()
 				dap.run_last()
+			end)
+			vim.keymap.set("n", "<Leader>dt", function()
+				dap.debug_test()
+			end)
+			vim.keymap.set("n", "<Leader>dlt", function()
+				dap.debug_last_test()
 			end)
 		end,
 	},
